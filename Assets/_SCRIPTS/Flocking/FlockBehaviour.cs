@@ -9,20 +9,43 @@ public class FlockBehaviour : MonoBehaviour
     Vector3 avgHeading; 
     Vector3 avgPos;
     private float neighbourDist; //Distance to decide if your neighbour enters the sub-group;
+    bool turning;
 
     void Start()
     {
         transVel = Random.Range(.5f, 1.0f);
         rotVel = 4.0f;
         neighbourDist = 3.0f;
+        turning = false;
     }
 
     void Update()
     {
-        if(Random.Range(0, 5) < 1)
+        if(Vector3.Distance(this.transform.position, Vector3.zero) >= FlockManager.skyRadius)
         {
-            ApplyRules();
+            turning = true;
         }
+        else
+        {
+            turning = false;
+        }
+
+        if(turning)
+        {
+            Vector3 mDirection = Vector3.zero - this.transform.position;
+            this.transform.rotation = Quaternion.Slerp( this.transform.rotation, 
+                                                        Quaternion.LookRotation(mDirection),
+                                                        rotVel * Time.deltaTime);
+            transVel = Random.Range(.5f, 1.0f);
+        }
+        else
+        {
+            if(Random.Range(0, 5) < 1)
+            {
+                ApplyRules();
+            }
+        }
+        
         this.transform.Translate(.0f, .0f, Time.deltaTime * transVel);
     }
 
