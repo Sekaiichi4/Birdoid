@@ -13,9 +13,9 @@ public class FlockBehaviour : MonoBehaviour
 
     void Start()
     {
-        transVel = Random.Range(.5f, 1.0f);
-        rotVel = 4.0f;
-        neighbourDist = 3.0f;
+        transVel = Random.Range(8.5f, 10.5f);
+        rotVel = 3.0f;
+        neighbourDist = 10.0f;
         turning = false;
     }
 
@@ -36,7 +36,7 @@ public class FlockBehaviour : MonoBehaviour
             this.transform.rotation = Quaternion.Slerp( this.transform.rotation, 
                                                         Quaternion.LookRotation(mDirection),
                                                         rotVel * Time.deltaTime);
-            transVel = Random.Range(.5f, 1.0f);
+            transVel = Random.Range(8.5f, 10.5f);
         }
         else
         {
@@ -74,7 +74,7 @@ public class FlockBehaviour : MonoBehaviour
                     mCenterVector += mBird.transform.position;
                     mGroupSize++;
 
-                    if(mDist < 1.0f)
+                    if(mDist < 3.0f)
                     {
                         mAvoidVector = mAvoidVector + (this.transform.position - mBird.transform.position);
                     }
