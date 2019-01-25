@@ -9,31 +9,23 @@ public class FlockBehaviour : MonoBehaviour
     Vector3 desiredDirection; 
     Vector3 currentDirection;
     public float neighbourDist; //Distance to decide if your neighbour enters the sub-group;
-    public bool turning;
+    public bool outofBounds;
 
     void Start()
     {
         transVel = Random.Range(2.5f, 6.5f);
         rotVel = 1.5f;
         neighbourDist = 4.0f;
-        turning = false;
+        outofBounds = false;
     }
 
     void Update()
     {
-        currentDirection = this.transform.TransformVector(.0f, .0f, Time.deltaTime * transVel).normalized * neighbourDist; 
-        Debug.DrawLine(transform.localPosition, transform.localPosition + currentDirection, Color.magenta);
         StayInBound();
-        Align();
-
-        
-        // else
-        // {
-        //     if(Random.Range(0, 5) < 5)
-        //     {
-        //         ApplyRules();
-        //     }
-        // }
+        if(!outofBounds)
+        {
+            Align();
+        } 
         
         this.transform.Translate(.0f, .0f, Time.deltaTime * transVel);
     }
@@ -52,10 +44,6 @@ public class FlockBehaviour : MonoBehaviour
                 mDist = Vector3.Distance(this.transform.position, mBird.transform.position);
                 if(mDist <= neighbourDist)
                 {
-                    //mCenterVector += mBird.transform.position;
-
-                    //Debug.DrawLine(this.transform.position, mCenterVector, Color.red);
-
                     FlockBehaviour mOtherFlockBehaviour = mBird.GetComponent<FlockBehaviour>();
 
                     this.transform.rotation = Quaternion.Slerp( this.transform.rotation, 
@@ -64,6 +52,9 @@ public class FlockBehaviour : MonoBehaviour
                 }
             }
         }
+        
+        currentDirection = this.transform.TransformVector(.0f, .0f, Time.deltaTime * transVel).normalized * neighbourDist; 
+        Debug.DrawLine(transform.localPosition, transform.localPosition + currentDirection, Color.magenta); 
     }
 
     void Cohese()
@@ -83,48 +74,47 @@ public class FlockBehaviour : MonoBehaviour
 
         if(Vector3.Distance(this.transform.position, Vector3.zero) >= FlockManager.skyRadius)
         {
-            turning = true;
-            // if(this.transform.position.x >= mSkyRadius)
-            // {
-            //     mDirection = new Vector3(-1*this.transform.position.x, this.transform.position.y, this.transform.position.z) - this.transform.position;
-            // }
-            // else if(this.transform.position.x <= -mSkyRadius)
-            // {
-            //     mDirection = new Vector3(-1*this.transform.position.x, this.transform.position.y, this.transform.position.z) - this.transform.position;
-            // }
-            // if(this.transform.position.y >= mSkyRadius)
-            // {
-            //     mDirection = new Vector3(this.transform.position.x, -1*this.transform.position.y, this.transform.position.z) - this.transform.position;
-            // }
-            // else if(this.transform.position.y <= -mSkyRadius)
-            // {
-            //     mDirection = new Vector3(this.transform.position.x, -1*this.transform.position.y, this.transform.position.z) - this.transform.position;
-            // }
-            // if(this.transform.position.z >= mSkyRadius)
-            // {
-            //     mDirection = new Vector3(this.transform.position.x, this.transform.position.y, -1*this.transform.position.z) - this.transform.position;
-            // }
-            // else if(this.transform.position.z <= -mSkyRadius)
-            // {
-            //     mDirection = new Vector3(this.transform.position.x, this.transform.position.y, -1*this.transform.position.z) - this.transform.position;
-            // }
-
-            mDirection = Vector3.zero - this.transform.position;
-
-            
+            outofBounds = true;
+            if(this.transform.position.x >= mSkyRadius)
+            {
+                mDirection = new Vector3(0, this.transform.position.y, this.transform.position.z) - this.transform.position;
+            }
+            else if(this.transform.position.x <= -mSkyRadius)
+            {
+                mDirection = new Vector3(0, this.transform.position.y, this.transform.position.z) - this.transform.position;
+            }
+            if(this.transform.position.y >= mSkyRadius)
+            {
+                mDirection = new Vector3(this.transform.position.x, 0, this.transform.position.z) - this.transform.position;
+            }
+            else if(this.transform.position.y <= -mSkyRadius)
+            {
+                mDirection = new Vector3(this.transform.position.x, 0, this.transform.position.z) - this.transform.position;
+            }
+            if(this.transform.position.z >= mSkyRadius)
+            {
+                mDirection = new Vector3(this.transform.position.x, this.transform.position.y, 0) - this.transform.position;
+            }
+            else if(this.transform.position.z <= -mSkyRadius)
+            {
+                mDirection = new Vector3(this.transform.position.x, this.transform.position.y, 0) - this.transform.position;
+            }
         }
-        else
+        else 
         {
-            turning = false;
+            outofBounds = false;
         }
 
-        if(turning)
+        if(outofBounds && (mDirection != Vector3.zero))
         {
             this.transform.rotation = Quaternion.Slerp( this.transform.rotation, 
                                                         Quaternion.LookRotation(mDirection),
                                                         rotVel * Time.deltaTime);
             transVel = Random.Range(2.5f, 6.5f);
+
+            Debug.DrawLine(transform.localPosition, transform.localPosition + mDirection, Color.yellow); 
         }
+
     }
 
     void ApplyRules()
