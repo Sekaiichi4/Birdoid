@@ -5,7 +5,7 @@ using UnityEngine;
 public class FlockManager : MonoBehaviour
 {
     public GameObject birdObj;  //Prefab of the Bird
-    static int birdAmount = 40; //Initial Amount of birds
+    static int birdAmount = 20; //Initial Amount of birds
     public static GameObject[] allBirds = new GameObject[birdAmount]; //List containing the Birds
     
     public static int skyRadius = 20;   //Sky radius for the birds to flock in.
@@ -18,25 +18,55 @@ public class FlockManager : MonoBehaviour
     {
         for (int i = 0; i < birdAmount; i++)
         {
-            Vector3 pos = new Vector3(  Random.Range(-skyRadius, skyRadius),
+            Vector3 mPos = new Vector3(  Random.Range(-skyRadius, skyRadius),
                                         Random.Range(-skyRadius, skyRadius),
                                         Random.Range(-skyRadius, skyRadius));
-            allBirds[i] = (GameObject) Instantiate(birdObj, pos, Quaternion.identity);
+            allBirds[i] = (GameObject) Instantiate(birdObj, mPos, Quaternion.identity);
         }
 
         if(showUI)
         {
-            Instantiate(UIControlsObj, Vector3.zero, Quaternion.identity, GameObject.Find("Canvas").transform);
+            UIControlsObj.SetActive(true);
+        }
+        else
+        {
+            UIControlsObj.SetActive(false);
         }
     }
 
     void Update()
     {
-        if(Random.Range(1, 1000) < 50)
+        Debug.DrawLine(new Vector3(-skyRadius, -skyRadius, -skyRadius), new Vector3(skyRadius, -skyRadius, -skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(skyRadius, -skyRadius, -skyRadius), new Vector3(skyRadius, skyRadius, -skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(skyRadius, skyRadius, -skyRadius), new Vector3(skyRadius, skyRadius, skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(skyRadius, skyRadius, skyRadius), new Vector3(-skyRadius, skyRadius, skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(-skyRadius, skyRadius, skyRadius), new Vector3(-skyRadius, -skyRadius, skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(-skyRadius, -skyRadius, skyRadius), new Vector3(-skyRadius, -skyRadius, -skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(skyRadius, -skyRadius, skyRadius), new Vector3(-skyRadius, -skyRadius, skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(skyRadius, -skyRadius, skyRadius), new Vector3(skyRadius, skyRadius, skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(-skyRadius, skyRadius, -skyRadius), new Vector3(-skyRadius, skyRadius, skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(-skyRadius, skyRadius, -skyRadius), new Vector3(skyRadius, skyRadius, -skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(-skyRadius, skyRadius, -skyRadius), new Vector3(-skyRadius, -skyRadius, -skyRadius), Color.green);
+        Debug.DrawLine(new Vector3(skyRadius, -skyRadius, -skyRadius), new Vector3(skyRadius, -skyRadius, skyRadius), Color.green);
+
+
+        for (int i = 0; i < allBirds.Length; i++)
         {
-            goalPos = new Vector3(  Random.Range(-skyRadius, skyRadius),
-                                    Random.Range(-skyRadius, skyRadius),
-                                    Random.Range(-skyRadius, skyRadius));
+            //Debug.DrawLine(allBirds[i].transform.position, goalPos);
+        }
+
+        // if(Random.Range(1, 1000) < 10)
+        // {
+        //     goalPos = new Vector3(  Random.Range(-skyRadius, skyRadius),
+        //                             Random.Range(-skyRadius, skyRadius),
+        //                             Random.Range(-skyRadius, skyRadius));
+        // }   
+    }
+    public void SetRange(float value)
+    {
+        for (int i = 0; i < allBirds.Length; i++)
+        {
+            allBirds[i].GetComponent<FlockBehaviour>().neighbourDist = value;
         }
     }
 }
