@@ -7,12 +7,12 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     FlockManager fManager;
-    Slider slider;
+    Slider[] sliders;
 
     private void Start() 
     {
         fManager = gameObject.GetComponentInParent<FlockManager>();
-        slider = GetComponentInChildren<Slider>();
+        sliders = GetComponentsInChildren<Slider>();
     }
 
     public void ResetScene()
@@ -22,14 +22,6 @@ public class UIManager : MonoBehaviour
 
     public void SetNewValue(int _valueID)
     {
-        //TODO: SWITCH STATEMENT
-        if(_valueID == 0)
-        {
-            fManager.SetRange(slider.value);
-        }
-        else if(_valueID == 1)
-        {
-
-        }
+        fManager.SetRangeFor(_valueID, sliders[_valueID].value);
     }
 }

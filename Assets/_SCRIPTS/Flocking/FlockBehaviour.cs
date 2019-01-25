@@ -4,30 +4,46 @@ using UnityEngine;
 
 public class FlockBehaviour : MonoBehaviour
 {
+    private FlockManager fManager;
     public float transVel; //Velocity of the Translation
     private float rotVel; //Velocity of the Rotation
-    Vector3 desiredDirection; 
     Vector3 currentDirection;
-    public float neighbourDist; //Distance to decide if your neighbour enters the sub-group;
+    Vector3 desiredDirection; 
+    public float adhesionDist; //Distance to decide if to copy the neighbour's direction.
+    public float cohesionDist; //Distance to decide if to close by on the neighbour;
+    public float separationDist; //Distance to decide if to back off from the neighbour;
     public bool outofBounds;
+    [SerializeField]
+    private bool isFollowing;
+    public bool isCaged;
 
     void Start()
     {
-        transVel = Random.Range(2.5f, 6.5f);
+        transVel = Random.Range(1.5f, 5.5f);
         rotVel = 1.5f;
-        neighbourDist = 4.0f;
+        adhesionDist = 3.0f;
+        cohesionDist = 6.0f;
+        separationDist = 1.0f;
         outofBounds = false;
+        isFollowing = false;
+        fManager = gameObject.GetComponentInParent<FlockManager>();
     }
 
     void Update()
     {
-        StayInBound();
+        if(isCaged)
+        {
+            StayInBounds();
+        }
+        
         if(!outofBounds)
         {
             Align();
+            Cohese();
         } 
         
         this.transform.Translate(.0f, .0f, Time.deltaTime * transVel);
+        Debug.DrawLine(transform.localPosition, transform.localPosition + desiredDirection, Color.cyan); 
     }
 
     void Align()
@@ -42,37 +58,80 @@ public class FlockBehaviour : MonoBehaviour
             if(mBird != this.gameObject)
             {
                 mDist = Vector3.Distance(this.transform.position, mBird.transform.position);
-                if(mDist <= neighbourDist)
+                if(mDist <= adhesionDist)
                 {
                     FlockBehaviour mOtherFlockBehaviour = mBird.GetComponent<FlockBehaviour>();
 
                     this.transform.rotation = Quaternion.Slerp( this.transform.rotation, 
                                                         mBird.transform.rotation,
                                                         rotVel * Time.deltaTime);
+
+                    desiredDirection = mBird.transform.TransformVector(.0f, .0f, Time.deltaTime * transVel).normalized;
                 }
             }
         }
-        
-        currentDirection = this.transform.TransformVector(.0f, .0f, Time.deltaTime * transVel).normalized * neighbourDist; 
+
+        currentDirection = this.transform.TransformVector(.0f, .0f, Time.deltaTime * transVel).normalized * adhesionDist; 
         Debug.DrawLine(transform.localPosition, transform.localPosition + currentDirection, Color.magenta); 
     }
 
     void Cohese()
     {
+        GameObject[] mBirds;
+        mBirds = FlockManager.allBirds;
 
+        float mDist;
+
+        foreach (GameObject mBird in mBirds)
+        {
+            if(mBird != this.gameObject)
+            {
+                mDist = Vector3.Distance(this.transform.position, mBird.transform.position);
+                if(mDist <= cohesionDist)
+                {
+                    isFollowing = true;
+                    FlockBehaviour mOtherFlockBehaviour = mBird.GetComponent<FlockBehaviour>();
+
+                    Vector3 mDirection = mBird.transform.position - this.transform.position;
+
+                    if(this.transVel < mOtherFlockBehaviour.transVel)
+                    {
+                        this.transVel = Mathf.Lerp( this.transVel, 
+                                                mOtherFlockBehaviour.transVel,
+                                                Time.deltaTime);
+
+                        if(mDirection != Vector3.zero)
+                        {
+                            this.transform.rotation = Quaternion.Slerp( this.transform.rotation, 
+                                                                        Quaternion.LookRotation(mDirection),
+                                                                        rotVel * Time.deltaTime);
+                        }
+                    }
+
+                    desiredDirection = (desiredDirection + mDirection).normalized;
+                }
+                else
+                {
+                    isFollowing = false;
+                }
+            }
+        }
     }
 
     void Separate()
     {
+        if(isFollowing)
+        {
 
+        }
     }
 
-    void StayInBound()
+    void StayInBounds()
     {
-        int mSkyRadius = FlockManager.skyRadius;
+        int mSkyRadius = fManager.cageRadius;
         Vector3 mDirection = Vector3.zero;
 
-        if(Vector3.Distance(this.transform.position, Vector3.zero) >= FlockManager.skyRadius)
+        if(Vector3.Distance(this.transform.position, Vector3.zero) >= fManager.cageRadius)
         {
             outofBounds = true;
             if(this.transform.position.x >= mSkyRadius)
@@ -110,9 +169,10 @@ public class FlockBehaviour : MonoBehaviour
             this.transform.rotation = Quaternion.Slerp( this.transform.rotation, 
                                                         Quaternion.LookRotation(mDirection),
                                                         rotVel * Time.deltaTime);
-            transVel = Random.Range(2.5f, 6.5f);
+            transVel = Random.Range(1.5f, 5.5f);
 
-            Debug.DrawLine(transform.localPosition, transform.localPosition + mDirection, Color.yellow); 
+            Debug.DrawLine(transform.localPosition, transform.localPosition + mDirection, Color.yellow);
+            desiredDirection = mDirection.normalized; 
         }
 
     }

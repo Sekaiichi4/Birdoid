@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class FlockManager : MonoBehaviour
 {
+    public bool birdsCaged; //A Booleon value to decide if you do or don't want to keep the birds within the skyRadius.    
+    public int cageRadius = 20;   //Sky radius for the birds to flock in.    
+    
     public GameObject birdObj;  //Prefab of the Bird
-    static int birdAmount = 20; //Initial Amount of birds
+    static int birdAmount = 40; //Initial Amount of birds
     public static GameObject[] allBirds = new GameObject[birdAmount]; //List containing the Birds
-    
-    public static int skyRadius = 20;   //Sky radius for the birds to flock in.
-    public static Vector3 goalPos = Vector3.zero; //Goal position for the birds to flock towards.
-    
+
     public bool showUI; //A Booleon value to decide if you do or don't want to show the UI Controls.
     public GameObject UIControlsObj;
     
@@ -18,10 +18,11 @@ public class FlockManager : MonoBehaviour
     {
         for (int i = 0; i < birdAmount; i++)
         {
-            Vector3 mPos = new Vector3(  Random.Range(-skyRadius, skyRadius),
-                                        Random.Range(-skyRadius, skyRadius),
-                                        Random.Range(-skyRadius, skyRadius));
-            allBirds[i] = (GameObject) Instantiate(birdObj, mPos, Quaternion.identity);
+            Vector3 mPos = new Vector3( Random.Range(-cageRadius, cageRadius),
+                                        Random.Range(-cageRadius, cageRadius),
+                                        Random.Range(-cageRadius, cageRadius));
+            allBirds[i] = (GameObject) Instantiate(birdObj, mPos, Quaternion.identity, this.transform);
+            allBirds[i].GetComponent<FlockBehaviour>().isCaged = birdsCaged;
         }
 
         if(showUI)
@@ -36,37 +37,45 @@ public class FlockManager : MonoBehaviour
 
     void Update()
     {
-        Debug.DrawLine(new Vector3(-skyRadius, -skyRadius, -skyRadius), new Vector3(skyRadius, -skyRadius, -skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(skyRadius, -skyRadius, -skyRadius), new Vector3(skyRadius, skyRadius, -skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(skyRadius, skyRadius, -skyRadius), new Vector3(skyRadius, skyRadius, skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(skyRadius, skyRadius, skyRadius), new Vector3(-skyRadius, skyRadius, skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(-skyRadius, skyRadius, skyRadius), new Vector3(-skyRadius, -skyRadius, skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(-skyRadius, -skyRadius, skyRadius), new Vector3(-skyRadius, -skyRadius, -skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(skyRadius, -skyRadius, skyRadius), new Vector3(-skyRadius, -skyRadius, skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(skyRadius, -skyRadius, skyRadius), new Vector3(skyRadius, skyRadius, skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(-skyRadius, skyRadius, -skyRadius), new Vector3(-skyRadius, skyRadius, skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(-skyRadius, skyRadius, -skyRadius), new Vector3(skyRadius, skyRadius, -skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(-skyRadius, skyRadius, -skyRadius), new Vector3(-skyRadius, -skyRadius, -skyRadius), Color.green);
-        Debug.DrawLine(new Vector3(skyRadius, -skyRadius, -skyRadius), new Vector3(skyRadius, -skyRadius, skyRadius), Color.green);
-
-
-        for (int i = 0; i < allBirds.Length; i++)
+        if(birdsCaged)
         {
-            //Debug.DrawLine(allBirds[i].transform.position, goalPos);
+            //Show the BoundaryBox
+            Debug.DrawLine(new Vector3(-cageRadius, -cageRadius, -cageRadius), new Vector3(cageRadius, -cageRadius, -cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(cageRadius, -cageRadius, -cageRadius), new Vector3(cageRadius, cageRadius, -cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(cageRadius, cageRadius, -cageRadius), new Vector3(cageRadius, cageRadius, cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(cageRadius, cageRadius, cageRadius), new Vector3(-cageRadius, cageRadius, cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(-cageRadius, cageRadius, cageRadius), new Vector3(-cageRadius, -cageRadius, cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(-cageRadius, -cageRadius, cageRadius), new Vector3(-cageRadius, -cageRadius, -cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(cageRadius, -cageRadius, cageRadius), new Vector3(-cageRadius, -cageRadius, cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(cageRadius, -cageRadius, cageRadius), new Vector3(cageRadius, cageRadius, cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(-cageRadius, cageRadius, -cageRadius), new Vector3(-cageRadius, cageRadius, cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(-cageRadius, cageRadius, -cageRadius), new Vector3(cageRadius, cageRadius, -cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(-cageRadius, cageRadius, -cageRadius), new Vector3(-cageRadius, -cageRadius, -cageRadius), Color.green);
+            Debug.DrawLine(new Vector3(cageRadius, -cageRadius, -cageRadius), new Vector3(cageRadius, -cageRadius, cageRadius), Color.green);
         }
-
-        // if(Random.Range(1, 1000) < 10)
+        
+        // for (int i = 0; i < allBirds.Length; i++)
         // {
-        //     goalPos = new Vector3(  Random.Range(-skyRadius, skyRadius),
-        //                             Random.Range(-skyRadius, skyRadius),
-        //                             Random.Range(-skyRadius, skyRadius));
-        // }   
+
+        // }
     }
-    public void SetRange(float value)
+    public void SetRangeFor(int _valueID, float _value)
     {
-        for (int i = 0; i < allBirds.Length; i++)
+        switch (_valueID)
         {
-            allBirds[i].GetComponent<FlockBehaviour>().neighbourDist = value;
-        }
+            case 0:
+            for (int i = 0; i < allBirds.Length; i++)
+            {
+                allBirds[i].GetComponent<FlockBehaviour>().adhesionDist = _value;
+            }
+            break;
+
+            case 1:
+            for (int i = 0; i < allBirds.Length; i++)
+            {
+                allBirds[i].GetComponent<FlockBehaviour>().cohesionDist = _value;
+            }
+            break;
+        }  
     }
 }
