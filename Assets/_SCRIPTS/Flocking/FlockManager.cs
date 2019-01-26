@@ -5,17 +5,19 @@ using UnityEngine;
 public class FlockManager : MonoBehaviour
 {
     public bool birdsCaged; //A Booleon value to decide if you do or don't want to keep the birds within the skyRadius.    
-    public int cageRadius = 20;   //Sky radius for the birds to flock in.    
+    public int cageRadius = 15;   //Sky radius for the birds to flock in.    
     
     public GameObject birdObj;  //Prefab of the Bird
-    static int birdAmount = 40; //Initial Amount of birds
-    public static GameObject[] allBirds = new GameObject[birdAmount]; //List containing the Birds
+    static int birdAmount = 60; //Initial Amount of birds
+    public GameObject[] allBirds; //List containing the Birds
 
     public bool showUI; //A Booleon value to decide if you do or don't want to show the UI Controls.
     public GameObject UIControlsObj;
     
     void Start()
     {
+        allBirds = new GameObject[birdAmount];
+
         for (int i = 0; i < birdAmount; i++)
         {
             Vector3 mPos = new Vector3( Random.Range(-cageRadius, cageRadius),
@@ -66,7 +68,7 @@ public class FlockManager : MonoBehaviour
             case 0:
             for (int i = 0; i < allBirds.Length; i++)
             {
-                allBirds[i].GetComponent<FlockBehaviour>().adhesionDist = _value;
+                allBirds[i].GetComponent<FlockBehaviour>().alignmentDist = _value;
             }
             break;
 
@@ -74,6 +76,12 @@ public class FlockManager : MonoBehaviour
             for (int i = 0; i < allBirds.Length; i++)
             {
                 allBirds[i].GetComponent<FlockBehaviour>().cohesionDist = _value;
+            }
+            break;
+            case 2:
+            for (int i = 0; i < allBirds.Length; i++)
+            {
+                allBirds[i].GetComponent<FlockBehaviour>().separationDist = _value;
             }
             break;
         }  
