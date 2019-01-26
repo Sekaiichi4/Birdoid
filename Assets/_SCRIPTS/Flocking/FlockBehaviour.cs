@@ -207,7 +207,7 @@ public class FlockBehaviour : MonoBehaviour
         {
             this.transform.rotation = Quaternion.Slerp( this.transform.rotation, 
                                                         Quaternion.LookRotation(mDirection),
-                                                        rotVel * Time.deltaTime);
+                                                        rotVel * 2 * Time.deltaTime);
             transVel = Random.Range(1.5f, 5.5f);
 
             Debug.DrawLine(transform.localPosition, transform.localPosition + mDirection, Color.yellow);
