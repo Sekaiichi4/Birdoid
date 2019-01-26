@@ -1,9 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FlockManager : MonoBehaviour
 {
+    private Toggle toggle;
     public bool birdsCaged; //A Booleon value to decide if you do or don't want to keep the birds within the skyRadius.    
     public int cageRadius = 15;   //Sky radius for the birds to flock in.    
     
@@ -16,6 +18,21 @@ public class FlockManager : MonoBehaviour
     
     void Start()
     {
+        SpawnBirds();
+
+        ToggleUIControls(showUI);
+
+        toggle = GetComponentInChildren<Toggle>();
+        toggle.isOn = birdsCaged;
+    }
+
+    public void SpawnBirds()
+    {
+        if(allBirds.Length != 0)
+        {
+            KillBirds();
+        }
+        
         allBirds = new GameObject[birdAmount];
 
         for (int i = 0; i < birdAmount; i++)
@@ -26,14 +43,13 @@ public class FlockManager : MonoBehaviour
             allBirds[i] = (GameObject) Instantiate(birdObj, mPos, Quaternion.identity, this.transform);
             allBirds[i].GetComponent<FlockBehaviour>().isCaged = birdsCaged;
         }
+    }
 
-        if(showUI)
+    public void KillBirds()
+    {
+        for (int i = 0; i < allBirds.Length; i++)
         {
-            UIControlsObj.SetActive(true);
-        }
-        else
-        {
-            UIControlsObj.SetActive(false);
+            Destroy(allBirds[i]); 
         }
     }
 
@@ -55,11 +71,6 @@ public class FlockManager : MonoBehaviour
             Debug.DrawLine(new Vector3(-cageRadius, cageRadius, -cageRadius), new Vector3(-cageRadius, -cageRadius, -cageRadius), Color.green);
             Debug.DrawLine(new Vector3(cageRadius, -cageRadius, -cageRadius), new Vector3(cageRadius, -cageRadius, cageRadius), Color.green);
         }
-        
-        // for (int i = 0; i < allBirds.Length; i++)
-        // {
-
-        // }
     }
     public void SetRangeFor(int _valueID, float _value)
     {
@@ -71,7 +82,6 @@ public class FlockManager : MonoBehaviour
                 allBirds[i].GetComponent<FlockBehaviour>().alignmentDist = _value;
             }
             break;
-
             case 1:
             for (int i = 0; i < allBirds.Length; i++)
             {
@@ -84,6 +94,53 @@ public class FlockManager : MonoBehaviour
                 allBirds[i].GetComponent<FlockBehaviour>().separationDist = _value;
             }
             break;
+            case 3:
+            for (int i = 0; i < allBirds.Length; i++)
+            {
+                birdAmount = (int) _value;
+                SpawnBirds();
+            }
+            break;
+            case 4:
+            for (int i = 0; i < allBirds.Length; i++)
+            {
+                allBirds[i].GetComponent<FlockBehaviour>().rotVel = _value;
+            }
+            break;
+            case 5:
+            for (int i = 0; i < allBirds.Length; i++)
+            {
+                allBirds[i].GetComponent<FlockBehaviour>().minVel = _value;
+                if(allBirds[i].GetComponent<FlockBehaviour>().transVel < _value)
+                {
+                    allBirds[i].GetComponent<FlockBehaviour>().transVel = _value;
+                }
+            }
+            break;
+            case 6:
+            for (int i = 0; i < allBirds.Length; i++)
+            {
+                allBirds[i].GetComponent<FlockBehaviour>().maxVel = _value;
+                if(allBirds[i].GetComponent<FlockBehaviour>().transVel > _value)
+                {
+                    allBirds[i].GetComponent<FlockBehaviour>().transVel = _value;
+                }
+            }
+            break;
         }  
+    }
+
+    public void ToggleUIControls(bool _activate)
+    {
+        UIControlsObj.SetActive(_activate);
+    }
+
+    public void ToggleCaging()
+    {
+        birdsCaged = toggle.isOn;
+        for (int i = 0; i < birdAmount; i++)
+        {
+            allBirds[i].GetComponent<FlockBehaviour>().isCaged = birdsCaged;
+        }
     }
 }

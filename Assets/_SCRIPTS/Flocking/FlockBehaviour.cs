@@ -5,8 +5,8 @@ using UnityEngine;
 public class FlockBehaviour : MonoBehaviour
 {
     private FlockManager fManager;
-    public float transVel; //Velocity of the Translation
-    private float rotVel; //Velocity of the Rotation
+    public float transVel, minVel, maxVel; //Velocity of the Translation
+    public float rotVel; //Velocity of the Rotation
     Vector3 currentDirection;
     Vector3 desiredDirection; 
     public float alignmentDist; //Distance to decide if to copy the neighbour's direction.
@@ -19,8 +19,10 @@ public class FlockBehaviour : MonoBehaviour
 
     void Start()
     {
-        transVel = Random.Range(1.5f, 5.5f);
-        rotVel = .25f;
+        minVel = 1.5f;
+        maxVel = 6f;
+        transVel = Random.Range(minVel, maxVel);
+        rotVel = 1f;
         alignmentDist = 4.0f;
         cohesionDist = 6.0f;
         separationDist = 3.0f;
@@ -208,7 +210,7 @@ public class FlockBehaviour : MonoBehaviour
             this.transform.rotation = Quaternion.Slerp( this.transform.rotation, 
                                                         Quaternion.LookRotation(mDirection),
                                                         rotVel * 2 * Time.deltaTime);
-            transVel = Random.Range(1.5f, 5.5f);
+            transVel = Random.Range(minVel, maxVel);
 
             Debug.DrawLine(transform.localPosition, transform.localPosition + mDirection, Color.yellow);
             desiredDirection = mDirection.normalized; 
