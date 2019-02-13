@@ -32,6 +32,7 @@ public class ARTapToPlaceObject : MonoBehaviour
             if(placementPoseIsValid && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
             {
                 PlaceObject();
+                isPlaced = true;
                 placementIndicator.SetActive(false);
             }
         }

@@ -76,74 +76,83 @@ namespace GoogleARCore.Examples.HelloAR
         /// </summary>
         private bool m_IsQuitting = false;
 
-        /// <summary>
-        /// The Unity Update() method.
-        /// </summary>
+        private bool isPlaced;
+
+        private void Start()
+        {
+            isPlaced = false;
+        }
+
         public void Update()
         {
             _UpdateApplicationLifecycle();
 
-            // Hide snackbar when currently tracking at least one plane.
-            Session.GetTrackables<DetectedPlane>(m_AllPlanes);
-            bool showSearchingUI = true;
-            for (int i = 0; i < m_AllPlanes.Count; i++)
+            if (!isPlaced)
             {
-                if (m_AllPlanes[i].TrackingState == TrackingState.Tracking)
+                // Hide snackbar when currently tracking at least one plane.
+                Session.GetTrackables<DetectedPlane>(m_AllPlanes);
+                bool showSearchingUI = true;
+                for (int i = 0; i < m_AllPlanes.Count; i++)
                 {
-                    showSearchingUI = false;
-                    break;
-                }
-            }
-
-            SearchingForPlaneUI.SetActive(showSearchingUI);
-
-            // If the player has not touched the screen, we are done with this update.
-            Touch touch;
-            if (Input.touchCount < 1 || (touch = Input.GetTouch(0)).phase != TouchPhase.Began)
-            {
-                return;
-            }
-
-            // Raycast against the location the player touched to search for planes.
-            TrackableHit hit;
-            TrackableHitFlags raycastFilter = TrackableHitFlags.PlaneWithinPolygon |
-                TrackableHitFlags.FeaturePointWithSurfaceNormal;
-
-            if (Frame.Raycast(touch.position.x, touch.position.y, raycastFilter, out hit))
-            {
-                // Use hit pose and camera pose to check if hittest is from the
-                // back of the plane, if it is, no need to create the anchor.
-                if ((hit.Trackable is DetectedPlane) &&
-                    Vector3.Dot(FirstPersonCamera.transform.position - hit.Pose.position,
-                        hit.Pose.rotation * Vector3.up) < 0)
-                {
-                    Debug.Log("Hit at back of the current DetectedPlane");
-                }
-                else
-                {
-                    // Choose the Andy model for the Trackable that got hit.
-                    GameObject prefab;
-                    if (hit.Trackable is FeaturePoint)
+                    if (m_AllPlanes[i].TrackingState == TrackingState.Tracking)
                     {
-                        prefab = AndyPointPrefab;
+                        showSearchingUI = false;
+                        break;
+                    }
+                }
+
+                SearchingForPlaneUI.SetActive(showSearchingUI);
+
+                // If the player has not touched the screen, we are done with this update.
+                Touch touch;
+                if (Input.touchCount < 1 || (touch = Input.GetTouch(0)).phase != TouchPhase.Began)
+                {
+                    return;
+                }
+
+                // Raycast against the location the player touched to search for planes.
+                TrackableHit hit;
+                TrackableHitFlags raycastFilter = TrackableHitFlags.PlaneWithinPolygon |
+                    TrackableHitFlags.FeaturePointWithSurfaceNormal;
+
+                if (Frame.Raycast(touch.position.x, touch.position.y, raycastFilter, out hit))
+                {
+                    // Use hit pose and camera pose to check if hittest is from the
+                    // back of the plane, if it is, no need to create the anchor.
+                    if ((hit.Trackable is DetectedPlane) &&
+                        Vector3.Dot(FirstPersonCamera.transform.position - hit.Pose.position,
+                            hit.Pose.rotation * Vector3.up) < 0)
+                    {
+                        Debug.Log("Hit at back of the current DetectedPlane");
                     }
                     else
                     {
-                        prefab = AndyPlanePrefab;
+                        // Choose the Andy model for the Trackable that got hit.
+                        GameObject prefab;
+                        if (hit.Trackable is FeaturePoint)
+                        {
+                            prefab = AndyPointPrefab;
+                        }
+                        else
+                        {
+                            prefab = AndyPlanePrefab;
+                        }
+
+                        // Instantiate Andy model at the hit pose.
+                        var andyObject = Instantiate(prefab, hit.Pose.position, hit.Pose.rotation);
+
+                        // Compensate for the hitPose rotation facing away from the raycast (i.e. camera).
+                        andyObject.transform.Rotate(0, k_ModelRotation, 0, Space.Self);
+
+                        // Create an anchor to allow ARCore to track the hitpoint as understanding of the physical
+                        // world evolves.
+                        var anchor = hit.Trackable.CreateAnchor(hit.Pose);
+
+                        // Make Andy model a child of the anchor.
+                        andyObject.transform.parent = anchor.transform;
+
+                        isPlaced = true;
                     }
-
-                    // Instantiate Andy model at the hit pose.
-                    var andyObject = Instantiate(prefab, hit.Pose.position, hit.Pose.rotation);
-
-                    // Compensate for the hitPose rotation facing away from the raycast (i.e. camera).
-                    andyObject.transform.Rotate(0, k_ModelRotation, 0, Space.Self);
-
-                    // Create an anchor to allow ARCore to track the hitpoint as understanding of the physical
-                    // world evolves.
-                    var anchor = hit.Trackable.CreateAnchor(hit.Pose);
-
-                    // Make Andy model a child of the anchor.
-                    andyObject.transform.parent = anchor.transform;
                 }
             }
         }

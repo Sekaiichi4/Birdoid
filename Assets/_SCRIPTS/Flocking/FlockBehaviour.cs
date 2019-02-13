@@ -61,7 +61,7 @@ public class FlockBehaviour : MonoBehaviour
         {
             if(mBird != this.gameObject)
             {
-                mDist = Vector3.Distance(this.transform.position, mBird.transform.position);
+                mDist = Vector3.Distance(this.transform.localPosition, mBird.transform.localPosition);
                 float alignPower = mDist;
 
                 if(mDist <= alignmentDist)
@@ -92,13 +92,13 @@ public class FlockBehaviour : MonoBehaviour
         {
             if(mBird != this.gameObject)
             {
-                mDist = Vector3.Distance(this.transform.position, mBird.transform.position);
+                mDist = Vector3.Distance(this.transform.localPosition, mBird.transform.localPosition);
                 if(mDist <= cohesionDist)
                 {
                     isFollowing = true;
                     FlockBehaviour mOtherFlockBehaviour = mBird.GetComponent<FlockBehaviour>();
 
-                    Vector3 mDirection = mBird.transform.position - this.transform.position;
+                    Vector3 mDirection = mBird.transform.localPosition - this.transform.localPosition;
                     float attractPower = mDist;
 
                     if(this.transVel < mOtherFlockBehaviour.transVel)
@@ -116,7 +116,7 @@ public class FlockBehaviour : MonoBehaviour
                     }
 
                     desiredDirection = (desiredDirection + mDirection).normalized;
-                    Debug.DrawLine(this.transform.position, mBird.transform.position, Color.red);
+                    Debug.DrawLine(this.transform.localPosition, mBird.transform.localPosition, Color.red);
                 }
                 else
                 {
@@ -137,13 +137,13 @@ public class FlockBehaviour : MonoBehaviour
         {
             if(mBird != this.gameObject)
             {
-                mDist = Vector3.Distance(this.transform.position, mBird.transform.position);
+                mDist = Vector3.Distance(this.transform.localPosition, mBird.transform.localPosition);
                 if(mDist <= separationDist)
                 {
                     isAvoiding = true;
                     FlockBehaviour mOtherFlockBehaviour = mBird.GetComponent<FlockBehaviour>();
 
-                    Vector3 mDirection = this.transform.position - mBird.transform.position;
+                    Vector3 mDirection = this.transform.localPosition - mBird.transform.localPosition;
                     float avoidPower = 10/mDist;
 
                     if(mDirection != Vector3.zero)
@@ -170,35 +170,35 @@ public class FlockBehaviour : MonoBehaviour
         int mSkyRadius = fManager.cageRadius;
         Vector3 mDirection = Vector3.zero;
         
-        if(this.transform.position.x >= mSkyRadius)
+        if(this.transform.localPosition.x >= mSkyRadius)
         {
             outofBounds = true;
-            mDirection = new Vector3(0, this.transform.position.y, this.transform.position.z) - this.transform.position;
+            mDirection = new Vector3(0, this.transform.localPosition.y, this.transform.localPosition.z) - this.transform.localPosition;
         }
-        else if(this.transform.position.x <= -mSkyRadius)
+        else if(this.transform.localPosition.x <= -mSkyRadius)
         {
             outofBounds = true;
-            mDirection = new Vector3(0, this.transform.position.y, this.transform.position.z) - this.transform.position;
+            mDirection = new Vector3(0, this.transform.localPosition.y, this.transform.localPosition.z) - this.transform.localPosition;
         }
-        else if(this.transform.position.y >= mSkyRadius)
+        else if(this.transform.localPosition.y >= mSkyRadius)
         {
             outofBounds = true;
-            mDirection = new Vector3(this.transform.position.x, 0, this.transform.position.z) - this.transform.position;
+            mDirection = new Vector3(this.transform.localPosition.x, 0, this.transform.localPosition.z) - this.transform.localPosition;
         }
-        else if(this.transform.position.y <= -mSkyRadius)
+        else if(this.transform.localPosition.y <= -mSkyRadius)
         {
             outofBounds = true;
-            mDirection = new Vector3(this.transform.position.x, 0, this.transform.position.z) - this.transform.position;
+            mDirection = new Vector3(this.transform.localPosition.x, 0, this.transform.localPosition.z) - this.transform.localPosition;
         }
-        else if(this.transform.position.z >= mSkyRadius)
+        else if(this.transform.localPosition.z >= mSkyRadius)
         {
             outofBounds = true;
-            mDirection = new Vector3(this.transform.position.x, this.transform.position.y, 0) - this.transform.position;
+            mDirection = new Vector3(this.transform.localPosition.x, this.transform.localPosition.y, 0) - this.transform.localPosition;
         }
-        else if(this.transform.position.z <= -mSkyRadius)
+        else if(this.transform.localPosition.z <= -mSkyRadius)
         {
             outofBounds = true;
-            mDirection = new Vector3(this.transform.position.x, this.transform.position.y, 0) - this.transform.position;
+            mDirection = new Vector3(this.transform.localPosition.x, this.transform.localPosition.y, 0) - this.transform.localPosition;
         }
         else
         {
@@ -215,60 +215,6 @@ public class FlockBehaviour : MonoBehaviour
             Debug.DrawLine(transform.localPosition, transform.localPosition + mDirection, Color.yellow);
             desiredDirection = mDirection.normalized; 
         }
-
-    }
-
-    void ApplyRules()
-    {
-        // GameObject[] mBirds;
-        // mBirds = FlockManager.allBirds;
-
-        // Vector3 mCenterVector = Vector3.zero;
-        // Vector3 mAvoidVector = Vector3.zero;
-
-        // int mGroupSize = 0; //Amount of birds within the sub-group within the main flock.
-        // float mGroupVel = .1f; //Velocity of the sub-group.
-
-        // Vector3 mGoalPos = FlockManager.goalPos;
-
-        // float mDist;
-        
-        // foreach (GameObject mBird in mBirds)
-        // {
-        //     if(mBird != this.gameObject)
-        //     {
-        //         mDist = Vector3.Distance(this.transform.position, mBird.transform.position);
-        //         if(mDist <= neighbourDist)
-        //         {
-        //             mCenterVector += mBird.transform.position;
-        //             mGroupSize++;
-
-        //             Debug.DrawLine(this.transform.position, mCenterVector, Color.red);
-
-        //             if(mDist < 2.0f)
-        //             {
-        //                 mAvoidVector = mAvoidVector + (this.transform.position - mBird.transform.position);
-        //             }
-
-        //             FlockBehaviour mOtherFlockBehaviour = mBird.GetComponent<FlockBehaviour>();
-        //             mGroupVel = mGroupVel + mOtherFlockBehaviour.transVel;
-        //         }
-        //     }
-        // }
-
-        // if(mGroupSize > 0)
-        // {
-        //     mCenterVector = mCenterVector/mGroupSize + (mGoalPos - this.transform.position);
-        //     transVel = mGroupVel/mGroupSize;
-
-        //     Vector3 mDirection = (mCenterVector + mAvoidVector) - this.transform.position;
-        //     if(mDirection != Vector3.zero)
-        //     {
-        //         this.transform.rotation = Quaternion.Slerp(this.transform.rotation, 
-        //                                                    Quaternion.LookRotation(mDirection),
-        //                                                    rotVel * Time.deltaTime);
-        //     } 
-        // }
 
     }
 }
